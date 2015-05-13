@@ -1,0 +1,245 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Problem_12
+{
+    class LefallDuRocks
+    {
+        static char hero = '■';
+        static int PlayBoardY = 24;
+        static int PlayerPositionX = 45 / 2;
+        static int ScorePoints = 0;
+        struct Rock
+        {
+            public int x;
+            public int y;
+            public string s;
+            public ConsoleColor color;
+        }
+        private static Random _random = new Random();
+        private static ConsoleColor GetRandomConsoleColor()
+        {
+            var consoleColors = Enum.GetValues(typeof(ConsoleColor));
+            return (ConsoleColor)consoleColors.GetValue(_random.Next(1, 16));
+
+        }
+        static Random random = new Random();
+        public static char RandomSign()
+        {
+            char[] skins = new char[11];
+            skins = "^@*&+%$#!■§©®".ToCharArray();
+            int num = random.Next(0, 13);
+            //char let = (char)('a' + num);
+            char let = skins[num];
+            return let;
+        }
+        static void PrintRocks(int x, int y, string s, ConsoleColor color = ConsoleColor.White)
+        {
+            Console.SetCursorPosition(x, y);
+            Console.ForegroundColor = color;
+            Console.Write(s);
+
+        }
+        static void HeroStartPosition()
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.SetCursorPosition(PlayerPositionX, 24);
+            Console.Write(hero);
+        }
+        static void PlayBoard()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            for (int i = 0; i <= PlayBoardY; i++)
+            {
+                Console.SetCursorPosition(0, i);
+                Console.Write("|");
+            }
+            for (int i = 0; i <= PlayBoardY; i++)
+            {
+                Console.SetCursorPosition(45, i);
+                Console.Write("|");
+            }
+
+        }
+        static void MoveHeroPositionLeft()
+        {
+            if (PlayerPositionX > 1)
+            {
+                PlayerPositionX--;
+            }
+
+
+        }
+        static void MoveHeroPositionRight()
+        {
+            if (PlayerPositionX <= 43)
+            {
+                PlayerPositionX++;
+            }
+        }
+        static void PrintScore(int x, int y, string XX, ConsoleColor color2)
+        {
+            Console.SetCursorPosition(x, y);
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.Write(XX);
+        }
+        static void Main(string[] args)
+        {
+            int LIVES = 5;
+            int Sleeping = 150;
+            Random randomGenerator = new Random();
+            List<Rock> Rocks = new List<Rock>();
+            Console.BufferHeight = Console.WindowHeight;
+            Console.BufferWidth = Console.WindowWidth;
+            Console.SetCursorPosition(27, 11);
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("Welcome to 'Falling Rocks'");
+            Console.SetCursorPosition(28, 13);
+            Console.Write("Press any key to start");
+            bool pauza = true;
+        here:
+            pauza = true;
+            Console.ReadKey();
+            while (pauza)
+            {
+
+                Rock newRock = new Rock();
+                newRock.color = GetRandomConsoleColor();
+                newRock.x = randomGenerator.Next(1, 45);
+                newRock.y = 0;
+                newRock.s = Convert.ToString(RandomSign());
+                Rocks.Add(newRock);
+
+
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo keyInfo = Console.ReadKey();
+                    if (keyInfo.Key == ConsoleKey.LeftArrow)
+                    {
+                        MoveHeroPositionLeft();
+                    }
+                    if (keyInfo.Key == ConsoleKey.RightArrow)
+                    {
+                        MoveHeroPositionRight();
+                    }
+                    if (keyInfo.Key == ConsoleKey.Enter)
+                    {
+                        pauza = false;
+                        Console.SetCursorPosition(37, 11);
+                        Console.WriteLine("Pause");
+                        goto here;
+                    }
+
+                }
+                while (Console.KeyAvailable)
+                {
+                    Console.ReadKey(true);
+                }
+
+                PlayBoard();
+                List<Rock> newList = new List<Rock>();
+                for (int i = 0; i < Rocks.Count; i++)
+                {
+                    Rock oldRock = Rocks[i];
+                    Rock RockRock = new Rock();
+                    RockRock.x = oldRock.x;
+                    RockRock.y = oldRock.y + 1;
+                    RockRock.s = oldRock.s;
+                    RockRock.color = oldRock.color;
+                    newList.Add(RockRock);
+                    if (RockRock.y == 24 && RockRock.x == PlayerPositionX)
+                    {
+                        LIVES--;
+                        Console.Beep(340, 200);
+                        Rocks.Clear();
+                        if (LIVES == 0)
+                        {
+                            PrintScore(60, 11, "GAME OVER", ConsoleColor.Red);
+                            PrintScore(58, 13, "Press any key", ConsoleColor.Red);
+                            Console.Beep(1400, 100);
+                            Console.Beep(1300, 100);
+                            Console.Beep(1200, 100);
+                            Console.Beep(1100, 500);
+                            Console.Beep(1000, 700);
+                            PrintScore(59, 15, "Result: " + ScorePoints, ConsoleColor.Red);
+                            Console.ReadKey();
+                            return;
+                       
+                        }
+                    }
+
+                    if (RockRock.y == 25)
+                    {
+                        newList.Remove(RockRock);
+                    }
+
+                }
+                Rocks = newList;
+                foreach (Rock rock in Rocks)
+                {
+                    PrintRocks(rock.x, rock.y, rock.s, rock.color);
+                }
+
+
+
+                HeroStartPosition();
+
+                ScorePoints++;
+                PrintScore(60, 11, "Lives: " + LIVES, ConsoleColor.Magenta);
+                PrintScore(60, 13, "Points: " + ScorePoints, ConsoleColor.Green);
+                if (ScorePoints >= 100 && ScorePoints < 110)
+                {
+                    PrintScore(60, 15, "Hell yeah!", ConsoleColor.Green);
+                    Sleeping = 120;
+                }
+                if (ScorePoints >= 200 && ScorePoints < 210)
+                {
+                    PrintScore(60, 15, "You rock!", ConsoleColor.Green);
+                    Sleeping = 100;
+                }
+                if (ScorePoints >= 300 && ScorePoints < 310)
+                {
+                    PrintScore(54, 15, "You're going places!!", ConsoleColor.Green);
+                    Sleeping = 80;
+                }
+                if (ScorePoints >= 400 && ScorePoints < 410)
+                {
+                    PrintScore(53, 15, "I'll stop counting now..", ConsoleColor.Green);
+                    Sleeping = 50;
+                }
+                if (ScorePoints >= 800 && ScorePoints < 820)
+                {
+                    PrintScore(53, 15, "Damn Gurll", ConsoleColor.Green);
+                    Sleeping = 40;
+                }
+                if (ScorePoints >= 1400 && ScorePoints < 1500)
+                {
+                    PrintScore(53, 15, "You wont catch it!!", ConsoleColor.Green);
+                    Sleeping = 30;
+                }
+                if (ScorePoints >= 2000 && ScorePoints < 2250)
+                {
+                    PrintScore(53, 15, "Before impossibru", ConsoleColor.Green);
+                    Sleeping = 20;
+                }
+                if (ScorePoints >= 3000 && ScorePoints < 3500)
+                {
+                    PrintScore(53, 15, "EmPOSEBREWEWWW", ConsoleColor.Green);
+                    Sleeping = 10;
+                }
+                if (ScorePoints >= 5500 && ScorePoints < 6500)
+                {
+                    PrintScore(53, 15, "GODLIKE", ConsoleColor.Green);
+                    Sleeping = 0;
+                }
+
+                System.Threading.Thread.Sleep(Sleeping);
+                Console.Clear();
+
+            }
+        }
+    }
+}
